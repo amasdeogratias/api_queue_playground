@@ -1,8 +1,14 @@
+import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/mysql2'
 
 import * as schema from './schema.ts'
 
-export const db = drizzle(process.env.DATABASE_URL!, {
+const databaseUrl = process.env.DATABASE_URL
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is not defined. Set it in your .env file.')
+}
+
+export const db = drizzle(databaseUrl, {
   schema,
   mode: 'default',
 })

@@ -1,11 +1,27 @@
 import express from 'express';
-import dotenv from 'dotenv'
-dotenv.config();
+import { db } from './database/db.ts'
+import { posts } from './database/schema.ts';
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+
+// Define your routes here
+app.get("/api/health", async (_req, res) => {
+    try {
+        await db.select().from(posts).limit(1);
+        return res.status(200).json({
+            status: "success",
+            message: "Database connection is healthy",
+        })
+    } catch(error) {
+        return res.status(500).json({
+            status: "error",
+            message: "Failed to connect to database",
+        })
+    }
+})
 
 app.listen(port, () => {
     console.log("Server is running on port " + port);
