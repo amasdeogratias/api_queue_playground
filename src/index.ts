@@ -3,6 +3,7 @@ import { db } from './database/db.ts'
 import { posts } from './database/schema.ts';
 import { createPosts, getPosts } from './lib/posts.ts';
 import { z } from 'zod';
+import type { Post } from './types.ts';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -43,17 +44,12 @@ app.post("/api/posts/generate", async (req, res) => {
 })
 
 //insert posts api route
-interface CreatePostBody  {
-  title: string,
-  content: string
-};
-
 const PostSchema = z.object({
     title: z.string().min(3, "Title cannot be empty"),
     content: z.string().min(10, "Content cannot be empty")
 })
 
-app.post("/api/posts", async (req: express.Request<{}, {}, CreatePostBody>, res) => {
+app.post("/api/posts", async (req: express.Request<{}, {}, Post>, res) => {
     
     const validatedData = PostSchema.safeParse(req.body);
     if (!validatedData.success) {

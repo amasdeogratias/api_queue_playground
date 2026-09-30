@@ -1,13 +1,13 @@
 import { db } from "../database/db.ts";
 import { posts } from "../database/schema.ts";
-import type { GeneratedPost } from "../types.ts";
+import type { Post } from "../types.ts";
 import { sql } from 'drizzle-orm';
 
 
 const TOTAL_POSTS = 10000;
 const BATCH_SIZE = 500;
 
-function generatePost(index: number): GeneratedPost {
+function generatePost(index: number): Post {
     return {
         title: `Post ${index}`,
         content: `This is the content for Post ${index}`
@@ -17,7 +17,7 @@ function generatePost(index: number): GeneratedPost {
 export async function createPosts() {
     for (let i = 0; i < TOTAL_POSTS; i += BATCH_SIZE) {
         const end = Math.min(i + BATCH_SIZE, TOTAL_POSTS);
-        const batch: GeneratedPost[] = [];
+        const batch: Post[] = [];
         for (let j = i; j < end; j++) {
             batch.push(generatePost(j + 1));
         }

@@ -1,4 +1,4 @@
-export type GeneratedPost = {
+export type Post = {
     title: string;
     content: string;
 }
