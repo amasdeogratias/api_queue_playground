@@ -5,6 +5,7 @@ import { createPosts, getPosts } from './lib/posts.ts';
 import { z } from 'zod';
 import type { Post } from './types.ts';
 import { addToQueue, startQueueWorker } from './lib/queue.ts';
+import { eq } from 'drizzle-orm';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -102,6 +103,29 @@ app.get("/api/posts", async (req, res) => {
         });
     }
 });
+
+//get single post by id
+app.get("/api/posts/:id", async (req, res) => {
+    const id = Number(req.params.id)
+    if(!id) {
+        return res.status(400).json({
+            message: "No post found"
+        })
+    }
+    try {
+        const response = await db.select().from(posts).where(eq(posts.id, id))
+        if(response.length === 0) {
+            return res.status(200).json({
+                message: "No post found for this id"
+            })
+        }
+        return res.status(200).json(response)
+    } catch (error) {
+        return res.status(500).json({
+            message: `"Problem in fetching data ${error}`
+        })
+    }
+})
 
 app.listen(port, () => {
     console.log("Server is running on port " + port);
