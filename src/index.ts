@@ -4,6 +4,7 @@ import { posts } from './database/schema.ts';
 import { createPosts, getPosts } from './lib/posts.ts';
 import { z } from 'zod';
 import type { Post } from './types.ts';
+import { addToQueue, startQueueWorker } from './lib/queue.ts';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -73,9 +74,12 @@ app.post("/api/posts", async (req: express.Request<{}, {}, Post>, res) => {
         }
 
     }catch (error) {
-        return res.status(500).json({
-            status: "error",
-            message: "Failed to insert post",
+        //if anything happen, try to insert data later
+        const queueItem = addToQueue(validatedData.data)
+        return res.status(202).json({
+            message: "Database unavailable. Your request has been queued for later processing.",
+            status: "queued",
+            queueId: queueItem.id
         })
     }
 })
@@ -101,4 +105,6 @@ app.get("/api/posts", async (req, res) => {
 
 app.listen(port, () => {
     console.log("Server is running on port " + port);
+
+    startQueueWorker();
 })
