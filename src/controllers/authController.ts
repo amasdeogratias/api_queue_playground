@@ -1,5 +1,15 @@
+import { users } from "#/database/schema.ts";
 import { db } from "../database/db.ts";
+import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+import { z } from "zod";
 
+
+const UserSchema = z.object({
+    name: z.string().min(3, "Name cannot be empty"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters long"),
+});
 
 export const authController =  {
     login: async (req: any, res: any) => {
@@ -9,6 +19,45 @@ export const authController =  {
             message: "Login successful",
         })
     },
-    register: async (req: any, res: any) => {}
+    
+    register: async (req: any, res: any) => {
+        const validatedData = UserSchema.safeParse(req.body);
+        if (!validatedData.success) {
+            return res.status(400).json({
+                status: "error",
+                message: validatedData.error.issues,
+            })
+        }
+
+        try {
+            const newEmail = validatedData.data.email.toLowerCase();
+            const existingUser = await db.select().from(users).where(eq(users.email, newEmail)).limit(1);
+            if (existingUser[0]) {
+                return res.status(400).json({
+                    status: "error",
+                    message: "User with this email already exists",
+                })
+            }
+
+            //hashthe password before storing it in the database
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(validatedData.data.password, salt);
+
+            await db.insert(users).values({
+                name: validatedData.data.name,
+                email: newEmail,
+                password: hashedPassword,
+            });
+            return res.status(201).json({
+                status: "success",
+                message: "User registered successfully",
+            })
+        } catch (error) {
+            return res.status(500).json({
+                status: "error",
+                message: "An error occurred while registering the user",
+            })
+        }
+    }
 
 }
