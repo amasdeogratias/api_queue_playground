@@ -8,6 +8,13 @@
       "when": 1790672543213,
       "tag": "0000_free_mad_thinker",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1791289116245,
+      "tag": "0001_flippant_chat",
+      "breakpoints": true
     }
   ]
 }
