@@ -10,6 +10,9 @@
     "module": "nodenext",
     "target": "esnext",
     "types": [],
+    "paths": {
+      "#/*": ["./src/*"]
+    },
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -44,5 +47,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
   },
-  "include": ["src"],
+  "include": ["src/**/*"]
 }
