@@ -6,11 +6,15 @@ import { z } from 'zod';
 import type { Post } from './types.ts';
 import { addToQueue, startQueueWorker } from './lib/queue.ts';
 import { eq } from 'drizzle-orm';
+import { authRouter } from '#/routes/authRoute.ts';
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+
+//routes
+app.use("/api/", authRouter);
 
 // Define your routes here
 app.get("/api/health", async (_req, res) => {
@@ -126,6 +130,8 @@ app.get("/api/posts/:id", async (req, res) => {
         })
     }
 })
+
+
 
 app.listen(port, () => {
     console.log("Server is running on port " + port);
