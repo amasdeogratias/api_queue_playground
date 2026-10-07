@@ -3,6 +3,7 @@ import { db } from "../database/db.ts";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { generateAccessToken, generateRefreshToken } from "#/lib/tokens.ts";
 
 
 const UserSchema = z.object({
@@ -14,12 +15,65 @@ const UserSchema = z.object({
 export const authController =  {
     login: async (req: any, res: any) => {
         const { email, password } = req.body;
-        return res.status(200).json({
-            status: "success",
-            message: "Login successful",
-        })
+        if (!email || !password) {
+            return res.status(400).json({
+                status: "error",
+                message: "Email and password are required",
+            })
+        }
+
+        const normalizedEmail = email.toLowerCase();
+
+        try {
+
+            const user = await db.select().from(users).where(eq(users.email, normalizedEmail))
+
+            if(!user[0]) {
+                return res.status(400).json({
+                    status: "error",
+                    message: "Invalid email or password"
+                })
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, user[0].password);
+            if(!isPasswordValid) {
+                return res.status(400).json({
+                    status: "error",
+                    message: "Invalid email or password"
+                })
+            }
+
+            // generate a token
+            const accessToken = generateAccessToken(user[0].id);
+            const refreshToken = generateRefreshToken(user[0].id);
+
+            // Set the refresh token in an HTTP-only cookie
+            res.cookie("refreshToken", refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production", // Set to true in production
+                sameSite: "strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            })
+            
+
+            return res.status(200).json({
+                status: "success",
+                message: "Login successful",
+                accessToken,
+                refreshToken,
+            });
+
+        }catch (error) {
+            console.error(error);
+
+            return res.status(500).json({
+                status: "error",
+                message: "Something went wrong",
+            });
+        }
+        
     },
-    
+
     register: async (req: any, res: any) => {
         const validatedData = UserSchema.safeParse(req.body);
         if (!validatedData.success) {

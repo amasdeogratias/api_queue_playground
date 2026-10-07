@@ -4,11 +4,13 @@ import { posts } from './database/schema.ts';
 import { startQueueWorker } from './lib/queue.ts';
 import { authRouter } from '#/routes/authRoute.ts';
 import { postsRouter } from './routes/postsRoute.ts';
+import cookieParser from "cookie-parser";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 
 //routes
 app.use("/api/", authRouter);
