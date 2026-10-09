@@ -13,6 +13,10 @@ const UserSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
+interface AuthRequest extends Request {
+    userId?: string;
+}
+
 export const authController =  {
     login: async (req: Request, res: Response) => {
         const { email, password } = req.body;
@@ -113,5 +117,45 @@ export const authController =  {
                 message: "An error occurred while registering the user",
             })
         }
-    }
+    },
+
+    getUser: async (req: AuthRequest, res: Response) => {
+        try {
+            if (!req.userId) {
+                return res.status(401).json({
+                    status: "error",
+                    message: "Unauthorized",
+                });
+            }
+
+            const user = await db
+                .select({
+                    id: users.id,
+                    name: users.name,
+                    email: users.email,
+                })
+                .from(users)
+                .where(eq(users.id, req.userId))
+                .limit(1);
+
+            if (!user[0]) {
+                return res.status(404).json({
+                    status: "error",
+                    message: "User not found",
+                });
+            }
+
+            return res.status(200).json({
+                status: "success",
+                data: user[0],
+            });
+        } catch (error) {
+            console.error(error);
+
+            return res.status(500).json({
+                status: "error",
+                message: "Something went wrong",
+            });
+        }
+    },
 }
