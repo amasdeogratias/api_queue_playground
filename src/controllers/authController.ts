@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express';
 import { users } from "#/database/schema.ts";
 import { db } from "../database/db.ts";
 import { eq } from "drizzle-orm";
@@ -13,7 +14,7 @@ const UserSchema = z.object({
 });
 
 export const authController =  {
-    login: async (req: any, res: any) => {
+    login: async (req: Request, res: Response) => {
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({
@@ -74,7 +75,7 @@ export const authController =  {
         
     },
 
-    register: async (req: any, res: any) => {
+    register: async (req: Request, res: Response) => {
         const validatedData = UserSchema.safeParse(req.body);
         if (!validatedData.success) {
             return res.status(400).json({
@@ -113,5 +114,4 @@ export const authController =  {
             })
         }
     }
-
 }
