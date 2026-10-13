@@ -11,7 +11,7 @@ import {
 } from 'drizzle-orm/mysql-core'
 
 import { schools } from '#/database/schema/schools.ts'
-import { users } from '#/database/schema.ts'
+import { users } from '#/database/schema/users.ts'
 import { ulid } from 'ulid'
 
 export const schoolMembers = mysqlTable(
