@@ -15,6 +15,13 @@
       "when": 1791289116245,
       "tag": "0001_flippant_chat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1791882938968,
+      "tag": "0002_fat_purifiers",
+      "breakpoints": true
     }
   ]
 }
