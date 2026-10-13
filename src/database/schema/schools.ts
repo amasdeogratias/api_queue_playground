@@ -7,12 +7,13 @@ import {
   index,
   uniqueIndex,
 } from 'drizzle-orm/mysql-core'
+import { ulid } from 'ulid'
 
 export const schools = mysqlTable(
   'schools',
   {
-    id: bigint('id', { mode: 'number', unsigned: true })
-      .autoincrement()
+    id: varchar('id', { length: 100 })
+      .$defaultFn(() => ulid())
       .primaryKey(),
 
     name: varchar('name', { length: 255 }).notNull(),
@@ -26,7 +27,7 @@ export const schools = mysqlTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()
-      .onUpdateNow()
+      .$onUpdate(() => new Date())
       .notNull(),
   },
   (table) => [
